@@ -47,6 +47,7 @@ public class DJFacade {
 	public Map<String, String> styles = new THashMap<String, String>();
 	public Map<String, Float> counters = new THashMap<String, Float>();
 	public Map<String, Boolean> bools = new THashMap<String, Boolean>();
+	public List<String> buttons = new ArrayList<String>();
 	private MouseEventListener mouseListener;
 	
 	public DJFacade(){
@@ -101,7 +102,7 @@ public class DJFacade {
 	}
 	
 	public void defaultSetup(){
-		List<String> buttons = new ArrayList<String>(Arrays.asList("add", "remove", "refresh", "veto", "favorite", "video", "download", "list", "chat", "unlock", "settings"));
+		buttons = new ArrayList<String>(Arrays.asList("add", "remove", "refresh", "veto", "favorite", "video", "download", "list", "chat", "unlock", "settings"));
 		files.get(Resource.SETTINGS).put("allowedButtons", buttons);
 	}
 	

@@ -30,8 +30,7 @@ public class PanelMainUnlocked implements AR, Panel {
 	}
 
 	public void display(){
-		
-		JFrame frame = new JFrame();
+
 		gui = new GUI("main");
 		gui.setLocationRelativeTo(null);
 		gui.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -59,7 +58,6 @@ public class PanelMainUnlocked implements AR, Panel {
 		gui.setVisible(true);
 		gui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		gui.addWindowListener(main.getListeners().adapter);
-		frame.setVisible(true);
 	}
 	
 	public void hide(){

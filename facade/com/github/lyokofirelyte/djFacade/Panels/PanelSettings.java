@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,20 +43,24 @@ public class PanelSettings implements AR, Panel {
 		
 		gui.addAttr(new JPanel(), "main");
 		gui.addAttr(new JPanel(), "allowedButtons");
-		gui.addAttr(new JLabel(main.getImage("icons/ic_action_accept.png", 50, 50)), "accept");
-		gui.getPanel("main").setPreferredSize(new Dimension(mainGui.getPanel("main").getWidth(), 100));
-		gui.setLocation(mainGui.getX(), mainGui.getY() - mainGui.getHeight());
+		gui.addAttr(new JLabel(main.getImage("icons/ic_action_accept.png", 70, 70)), "accept");
+		gui.getPanel("main").setPreferredSize(new Dimension(1000, 100));
+		gui.setLocation(mainGui.getX(), (mainGui.getY() - mainGui.getHeight()) - gui.getHeight());
 		
 		for (String button : main.getMouseListener().map.keySet()){
 			if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(button)){
-				gui.addAttr(new JLabel(main.getImage("icons/dark/ic_action_" + main.getMouseListener().map.get(button) + ".png", 20, 20)), button);
+				gui.addAttr(new JLabel(main.getImage("icons/dark/ic_action_" + main.getMouseListener().map.get(button) + ".png", 40, 40)), button + "_settings");
 			} else {
-				gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(button) + ".png", 20, 20)), button);
+				gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(button) + ".png", 40, 40)), button + "_settings");
 			}
-			gui.getPanel("allowedButtons").add(gui.getLabel(button));
+			gui.getLabel(button + "_settings").addMouseListener(new MouseEventListener(main, button + "_settings"));
+			gui.addAttr(new JPanel(), main.getMouseListener().map.get(button));
+			gui.getPanel(main.getMouseListener().map.get(button)).add(gui.getLabel(button + "_settings"));
+			gui.getPanel("allowedButtons").add(gui.getPanel(main.getMouseListener().map.get(button)));
 		}
 
-		gui.getPanel("allowedButtons").setLayout(new FlowLayout(FlowLayout.LEFT, 1, 0));
+		gui.getPanel("allowedButtons").setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
+		gui.panel().setBorder(BorderFactory.createTitledBorder(main.loadStyle("setup.dj") + "Displayed Buttons" + main.loadStyle("setup_end.dj")));
 		gui.getPanel("main").add(gui.getPanel("allowedButtons"));
 		gui.getPanel("main").setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
 		gui.getPanel("main").add(gui.getLabel("accept"));

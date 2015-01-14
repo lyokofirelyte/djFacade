@@ -8,6 +8,7 @@ import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,6 +49,21 @@ public class MouseEventListener implements MouseListener {
 	public void mouseClicked(MouseEvent e) {
 		
 		GUI gui = main.getPanel(Resource.MAIN).getGui();
+		
+		if (type.contains("_settings")){
+			GUI settingsGUI = main.getPanel(Resource.PANEL_SETTINGS).getGui();
+			List<String> allowed = main.files.get(Resource.SETTINGS).getList("allowedButtons");
+			if (allowed.contains(type.replace("_settings", ""))){
+				allowed.remove(type.replace("_settings", ""));
+				settingsGUI.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type.replace("_settings", "")) + ".png", 40, 40));
+			} else {
+				allowed.add(type.replace("_settings", ""));
+				settingsGUI.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(type.replace("_settings", "")) + ".png", 40, 40));
+			}
+			gui.dispose();
+			main.getPanel(Resource.MAIN).display();
+			main.getPanel(Resource.MAIN).getGui().setLocation(gui.getX(), gui.getY());
+		}
 
 		switch (type){
 		
@@ -101,16 +117,17 @@ public class MouseEventListener implements MouseListener {
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		
-		GUI gui = main.getPanel(Resource.MAIN).getGui();
+		GUI gui = type.contains("_settings") ? main.getPanel(Resource.PANEL_SETTINGS).getGui() : main.getPanel(Resource.MAIN).getGui();
 		main.counters.put("fadeIn", 0.05F);
 		
-		if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type) && !main.bools.get("unlocked")){
+		if ((main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type) || type.contains("_settings")) && !main.bools.get("unlocked")){
 				
 				gui.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-5);
-				gui.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(type) + ".png"));
-				//alphaFadeIn(e.getComponent());
-				e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 1.0f));
+				if (!type.contains("_settings")){
+					gui.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(type) + ".png"));
+					e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 1.0f));
+				}
 				gui.repaint();
 		}
 	}
@@ -118,16 +135,17 @@ public class MouseEventListener implements MouseListener {
 	@Override
 	public void mouseExited(MouseEvent e) {
 	
-		GUI gui = main.getPanel(Resource.MAIN).getGui();
+		GUI gui = type.contains("_settings") ? main.getPanel(Resource.PANEL_SETTINGS).getGui() : main.getPanel(Resource.MAIN).getGui();
 		main.counters.put("fadeOut", 1F);
 		
-		if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type) && !main.bools.get("unlocked")){
+		if ((main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type) || type.contains("settings")) && !main.bools.get("unlocked")){
 			
 				gui.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()+5);
-				gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type) + ".png"));
-				//alphaFadeOut(e.getComponent());
-				e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
+				if (!type.contains("_settings")){
+					gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type) + ".png"));
+					e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
+				}
 				gui.repaint();
 		}
 	}
@@ -135,15 +153,19 @@ public class MouseEventListener implements MouseListener {
 	@Override
 	public void mousePressed(MouseEvent e) {
 		
-		GUI gui = main.getPanel(Resource.MAIN).getGui();
-		gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()+2);
+		if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type)){
+			GUI gui = main.getPanel(Resource.MAIN).getGui();
+			gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()+2);
+		}
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		
-		GUI gui = main.getPanel(Resource.MAIN).getGui();
-		gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-2);
+		if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type)){
+			GUI gui = main.getPanel(Resource.MAIN).getGui();
+			gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-2);
+		}
 	}
 	
 	public void alphaFadeIn(final Component c){

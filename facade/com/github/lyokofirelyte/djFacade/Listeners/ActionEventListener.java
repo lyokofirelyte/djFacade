@@ -57,7 +57,7 @@ public class ActionEventListener implements AR, ActionListener {
 					panel.getGui().getLabel("whoAreYou").setText(panel.getGui().getLabel("whoAreYou").getText().replace("Who are you?", "Saving..."));
 					ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 					scheduler.schedule(new Runnable(){
-						public void run(){
+						public void run(){http://marketplace.eclipse.org/content/eclipse-color-theme
 							fadeOut(panel.getGui());
 							map.put("username", panel.getGui().getHintTextField("username").getText());
 							panel.getGui().getPanel("login_main").remove(panel.getGui().getHintTextField("username"));
