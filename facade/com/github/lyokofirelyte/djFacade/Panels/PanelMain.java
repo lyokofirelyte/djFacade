@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,7 +33,7 @@ public class PanelMain implements AR, Panel {
 	public void display(){
 		gui = new GUI("main");
 		gui.setLocationRelativeTo(null);
-		gui.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		gui.setLayout(new GridLayout(0, 1));
 		gui.setResizable(false);
 		gui.setTitle("djFacade");
 		gui.setUndecorated(true);
@@ -40,19 +41,25 @@ public class PanelMain implements AR, Panel {
 		gui.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getClassLoader().getResource("bg.png")));
 		
 		gui.addAttr(new JPanel(), "main");
+		gui.addAttr(new JPanel(), "info");
 		
 		for (String name : main.files.get(Resource.SETTINGS).getList("allowedButtons")){
 			System.out.println("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png");
 			gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png")), name);
 			gui.addAttr(new JPanel(), name + "_panel");
-			gui.getPanel(name + "_panel").setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
+			gui.getPanel(name + "_panel").setBackground(main.getEventListener().getColor(Color.decode(main.files.get(Resource.SETTINGS).getStr("color_tint"))));
 			gui.panel().addMouseListener(new MouseEventListener(main, name));
 			gui.getPanel(name + "_panel").add(gui.getLabel(name));
 			gui.getPanel("main").add(gui.getPanel(name + "_panel"));
 		}
 
 		gui.getPanel("main").setOpaque(false);
+		gui.getPanel("info").setOpaque(false);
+		gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "djFacade" + main.loadStyle("setup_end.dj")));
+
+		gui.getPanel("main").setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
 		gui.add(gui.getPanel("main"));
+		gui.add(gui.getPanel("info"));
 		
 		gui.setAlwaysOnTop(true);
 		gui.pack();

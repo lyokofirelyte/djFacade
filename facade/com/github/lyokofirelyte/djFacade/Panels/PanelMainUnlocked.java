@@ -1,22 +1,16 @@
 package com.github.lyokofirelyte.djFacade.Panels;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
 import java.awt.Toolkit;
 
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.github.lyokofirelyte.djFacade.DJFacade;
 import com.github.lyokofirelyte.djFacade.GUI;
-import com.github.lyokofirelyte.djFacade.HintTextField;
 import com.github.lyokofirelyte.djFacade.Identifiers.AR;
-import com.github.lyokofirelyte.djFacade.Identifiers.ActionCommand;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
 import com.github.lyokofirelyte.djFacade.Listeners.MouseEventListener;
 

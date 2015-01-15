@@ -3,7 +3,6 @@ package com.github.lyokofirelyte.djFacade;
 import gnu.trove.map.hash.THashMap;
 
 import java.awt.Image;
-import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -49,6 +48,7 @@ public class DJFacade {
 	public Map<String, Boolean> bools = new THashMap<String, Boolean>();
 	public List<String> buttons = new ArrayList<String>();
 	private MouseEventListener mouseListener;
+	private YouTubeHandler handler = new YouTubeHandler();
 	
 	public DJFacade(){
 		tryCatch(this, "start");
@@ -67,6 +67,12 @@ public class DJFacade {
 	
 	public void start() throws Exception {
 		
+		try {
+			handler.authorize(new ArrayList<String>(Arrays.asList("https://www.googleapis.com/auth/youtube.readonly")), "youtubetest");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		listeners();
 		tryCatch(this, "settings");
 		boolean cont = false;
@@ -81,18 +87,12 @@ public class DJFacade {
 			
 			JSONObject obj = sendPost("/api/login", sendMap);
 			
-			for (Object o : obj.keySet()){
-				if (((String) o).equals("success")){
-					getPanel(Resource.MAIN).display();
-					if (files.get(Resource.SETTINGS).containsKey("mainX")){
-						getPanel(Resource.MAIN).getGui().setLocation(files.get(Resource.SETTINGS).getInt("mainX"), files.get(Resource.SETTINGS).getInt("mainY"));
-					}
-					cont = true;
-					break;
+			if (obj.get("success").equals(true)){
+				getPanel(Resource.MAIN).display();
+				if (files.get(Resource.SETTINGS).containsKey("mainX")){
+					getPanel(Resource.MAIN).getGui().setLocation(files.get(Resource.SETTINGS).getInt("mainX"), files.get(Resource.SETTINGS).getInt("mainY"));
 				}
-			}
-			
-			if (!cont){
+			} else {
 				System.out.println("Files have been modified! Re-auth needed!");
 				getPanel(Resource.PANEL_LOGIN).display();
 			}
@@ -101,7 +101,15 @@ public class DJFacade {
 		System.out.println("System completed startup.");
 	}
 	
+	public YouTubeHandler getYouTubeHandler(){
+		return handler;
+	}
+	
 	public void defaultSetup(){
+		files.get(Resource.SETTINGS).set("transparency", 0.05f);
+		files.get(Resource.SETTINGS).set("on_top", true);
+		files.get(Resource.SETTINGS).set("color_tint", "#FFFFFF");
+		files.get(Resource.SETTINGS).set("tool_tips", true);
 		buttons = new ArrayList<String>(Arrays.asList("add", "remove", "refresh", "veto", "favorite", "video", "download", "list", "chat", "unlock", "settings"));
 		files.get(Resource.SETTINGS).put("allowedButtons", buttons);
 	}

@@ -2,24 +2,15 @@ package com.github.lyokofirelyte.djFacade.Listeners;
 
 import gnu.trove.map.hash.THashMap;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.color.ColorSpace;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.DataLine;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.json.simple.JSONObject;
 
@@ -40,17 +31,59 @@ public class ActionEventListener implements AR, ActionListener {
 	public ActionEventListener(DJFacade i){
 		main = i;
 	}
+	
+	public Color getColor(Color c){
+	    return new Color(
+	    		c.getRed()/255,
+	            c.getGreen()/255,
+	            c.getBlue()/255,
+	            main.files.get(Resource.SETTINGS).getFloat("transparency")
+	    );
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 
 		switch (ActionCommand.valueOf(e.getActionCommand().toString())){
 		
+			case COLOR:
+				
+				GUI gui = main.getPanel(Resource.MAIN).getGui();
+				String text = main.getPanel(Resource.PANEL_SETTINGS).getGui().getHintTextField("color_tint").getText();
+				Color clor = getColor(Color.decode(text));
+				
+				main.files.get(Resource.SETTINGS).put("color_tint", text);
+				
+				for (String thing : gui.objects.keySet()){
+					if (thing.contains("_panel")){
+						try {
+							gui.getPanel(thing).setBackground(clor);
+						} catch (Exception ee){}
+					}
+				}
+				
+				gui.repaint();
+				
+			break;
+			
+			case TOOL_TIPS:
+				
+				main.files.get(Resource.SETTINGS).set("tool_tips", !main.files.get(Resource.SETTINGS).getBool("tool_tips"));
+				
+			break;
+			
+			case ON_TOP:
+				
+				main.files.get(Resource.SETTINGS).set("on_top", !main.files.get(Resource.SETTINGS).getBool("on_top"));
+				main.getPanel(Resource.MAIN).getGui().setAlwaysOnTop(main.files.get(Resource.SETTINGS).getBool("on_top"));
+				
+			break;
+		
 			case SETUP_TEXT:
 				
 				final JSONMap map = main.files.get(Resource.SETTINGS);
 				final Panel panel = main.getPanel(Resource.PANEL_LOGIN);
-				String text = panel.getGui().getLabel("whoAreYou").getText();
+				text = panel.getGui().getLabel("whoAreYou").getText();
 				
 				if (text.contains("Who are you?")){
 					System.out.println("Username recorded - transition moving.");
@@ -104,21 +137,19 @@ public class ActionEventListener implements AR, ActionListener {
 						sendMap.put("password", map.getStr("password"));
 						
 						JSONObject obj = main.sendPost("/api/login", sendMap);
-						
-						for (Object o : obj.keySet()){
-							if (((String) o).equals("success")){
-								System.out.println("Username & password are correct.");
-								map.put("loggedIn", true);
-								try {
-									main.saveAll();
-								} catch (Exception ee){
-									ee.printStackTrace();
-								}
-								main.getPanel(Resource.MAIN).display();
-								panel.destroy();
-							} else {
-								panel.getGui().getHintTextField("confirm").setText("INVALID CREDENTIALS!");
+
+						if (obj.get("success").equals(true)){
+							System.out.println("Username & password are correct.");
+							map.put("loggedIn", true);
+							main.getPanel(Resource.MAIN).display();
+							panel.destroy();
+							try {
+								main.saveAll();
+							} catch (Exception ee){
+								ee.printStackTrace();
 							}
+						} else {
+							panel.getGui().getHintTextField("confirm").setText("INVALID CREDENTIALS!");
 						}
 						
 					} else if (panel.getGui().getHintTextField("confirm").getText().equals("restart")){

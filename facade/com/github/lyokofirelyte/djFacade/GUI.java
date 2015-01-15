@@ -1,17 +1,17 @@
 package com.github.lyokofirelyte.djFacade;
 
-import java.awt.Graphics;
 import java.util.Map;
 
 import gnu.trove.map.hash.THashMap;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -26,11 +26,15 @@ public class GUI extends JDialog {
 	}
 	
 	String name = "null";
-	Map<String, Object> objects = new THashMap<String, Object>();
+	public Map<String, Object> objects = new THashMap<String, Object>();
 	Object curr;
 	
 	public String getName(){
 		return name;
+	}
+	
+	public JSlider getSlider(String name){
+		return (JSlider) (curr = objects.get(name));
 	}
 	
 	public JEditorPane getEditorPane(String name){
@@ -73,8 +77,16 @@ public class GUI extends JDialog {
 		return (HintPasswordField) (curr = objects.get(name));
 	}
 	
+	public JColorChooser getChooser(String name){
+		return (JColorChooser) (curr = objects.get(name));
+	}
+	
 	public JEditorPane editorPane(){
 		return (JEditorPane) curr;
+	}
+
+	public JSlider slider(){
+		return (JSlider) curr;
 	}
 
 	public JLabel label(){
@@ -111,6 +123,10 @@ public class GUI extends JDialog {
 	
 	public HintPasswordField hintPasswordField(){
 		return (HintPasswordField) curr;
+	}
+	
+	public JColorChooser chooser(){
+		return (JColorChooser) curr;
 	}
 	
 	public GUI addAttr(Object o, String name){

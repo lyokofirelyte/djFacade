@@ -3,20 +3,16 @@ package com.github.lyokofirelyte.djFacade.Listeners;
 import gnu.trove.map.hash.THashMap;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+
+import javax.swing.BorderFactory;
 
 import com.github.lyokofirelyte.djFacade.DJFacade;
 import com.github.lyokofirelyte.djFacade.GUI;
-import com.github.lyokofirelyte.djFacade.Identifiers.AR;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
 import com.github.lyokofirelyte.djFacade.Panels.Panel;
 
@@ -48,6 +44,10 @@ public class MouseEventListener implements MouseListener {
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		
+		if (main.bools.get("unlocked") && !type.contains("unlock")){
+			return;
+		}
+		
 		GUI gui = main.getPanel(Resource.MAIN).getGui();
 		
 		if (type.contains("_settings")){
@@ -68,7 +68,6 @@ public class MouseEventListener implements MouseListener {
 		switch (type){
 		
 			case "add":
-				
 				
 				
 				
@@ -118,13 +117,16 @@ public class MouseEventListener implements MouseListener {
 	public void mouseEntered(MouseEvent e) {
 		
 		GUI gui = type.contains("_settings") ? main.getPanel(Resource.PANEL_SETTINGS).getGui() : main.getPanel(Resource.MAIN).getGui();
-		main.counters.put("fadeIn", 0.05F);
+		main.counters.put("fadeIn", main.files.get(Resource.SETTINGS).getFloat("transparency"));
 		
 		if ((main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(type) || type.contains("_settings")) && !main.bools.get("unlocked")){
 				
 				gui.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-5);
 				if (!type.contains("_settings")){
+					if (main.files.get(Resource.SETTINGS).getBool("tool_tips")){
+						gui.getPanel("info").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + type + main.loadStyle("setup_end.dj")));
+					}
 					gui.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(type) + ".png"));
 					e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 1.0f));
 				}
@@ -144,7 +146,8 @@ public class MouseEventListener implements MouseListener {
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()+5);
 				if (!type.contains("_settings")){
 					gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type) + ".png"));
-					e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
+					gui.getPanel("info").setBorder(BorderFactory.createEmptyBorder());
+					e.getComponent().setBackground(main.getEventListener().getColor(Color.decode(main.files.get(Resource.SETTINGS).getStr("color_tint"))));
 				}
 				gui.repaint();
 		}
@@ -166,32 +169,5 @@ public class MouseEventListener implements MouseListener {
 			GUI gui = main.getPanel(Resource.MAIN).getGui();
 			gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-2);
 		}
-	}
-	
-	public void alphaFadeIn(final Component c){
-		
-		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-		scheduler.scheduleWithFixedDelay(new Runnable(){
-			public void run(){
-				c.setBackground(new Color(1.0f, 1.0f, 1.0f, main.counters.get("fadeIn")));
-				main.counters.put("fadeIn", main.counters.get("fadeIn") + 0.1f);
-				if (main.counters.get("fadeIn") > 1.0f){
-					scheduler.shutdown();
-				}
-		}}, 0L, 10L, TimeUnit.MILLISECONDS);
-	}
-	
-	public void alphaFadeOut(final Component c){
-		
-		final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-		scheduler.scheduleWithFixedDelay(new Runnable(){
-			public void run(){
-				c.setBackground(new Color(1.0f, 1.0f, 1.0f, main.counters.get("fadeOut")));
-				main.getPanel(Resource.MAIN).getGui().repaint();
-				main.counters.put("fadeOut", main.counters.get("fadeOut") - 0.1f);
-				if (main.counters.get("fadeOut") < 0.05f){
-					scheduler.shutdown();
-				}
-		}}, 0L, 10L, TimeUnit.MILLISECONDS);
 	}
 }
