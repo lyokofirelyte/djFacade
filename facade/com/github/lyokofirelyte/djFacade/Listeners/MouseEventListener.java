@@ -13,6 +13,7 @@ import javax.swing.BorderFactory;
 
 import com.github.lyokofirelyte.djFacade.DJFacade;
 import com.github.lyokofirelyte.djFacade.GUI;
+import com.github.lyokofirelyte.djFacade.JSONMap;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
 import com.github.lyokofirelyte.djFacade.Panels.Panel;
 
@@ -137,6 +138,7 @@ public class MouseEventListener implements MouseListener {
 	@Override
 	public void mouseExited(MouseEvent e) {
 	
+		JSONMap settings = main.files.get(Resource.SETTINGS);
 		GUI gui = type.contains("_settings") ? main.getPanel(Resource.PANEL_SETTINGS).getGui() : main.getPanel(Resource.MAIN).getGui();
 		main.counters.put("fadeOut", 1F);
 		
@@ -147,7 +149,8 @@ public class MouseEventListener implements MouseListener {
 				if (!type.contains("_settings")){
 					gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type) + ".png"));
 					gui.getPanel("info").setBorder(BorderFactory.createEmptyBorder());
-					e.getComponent().setBackground(main.getEventListener().getColor(Color.decode(main.files.get(Resource.SETTINGS).getStr("color_tint"))));
+					gui.getPanel(type + "_panel").setBackground(new Color(settings.getFloat("color_slider_red"), settings.getFloat("color_slider_green"), settings.getFloat("color_slider_blue"), settings.getFloat("transparency")));
+
 				}
 				gui.repaint();
 		}

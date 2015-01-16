@@ -25,6 +25,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 
@@ -99,6 +100,14 @@ public class DJFacade {
 		}
 		
 		System.out.println("System completed startup.");
+	}
+	
+	public void updateHeader(String name){
+		getPanel(Resource.MAIN).getGui().getPanel("main").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), loadStyle("setup.dj") + name + loadStyle("setup_end.dj")));
+	}
+	
+	public void hideHeader(){
+		updateHeader("");
 	}
 	
 	public YouTubeHandler getYouTubeHandler(){

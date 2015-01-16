@@ -16,6 +16,7 @@ import javax.swing.JPanel;
 import com.github.lyokofirelyte.djFacade.DJFacade;
 import com.github.lyokofirelyte.djFacade.GUI;
 import com.github.lyokofirelyte.djFacade.HintTextField;
+import com.github.lyokofirelyte.djFacade.JSONMap;
 import com.github.lyokofirelyte.djFacade.Identifiers.AR;
 import com.github.lyokofirelyte.djFacade.Identifiers.ActionCommand;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
@@ -31,6 +32,9 @@ public class PanelMain implements AR, Panel {
 	}
 
 	public void display(){
+		
+		JSONMap settings = main.files.get(Resource.SETTINGS);
+		
 		gui = new GUI("main");
 		gui.setLocationRelativeTo(null);
 		gui.setLayout(new GridLayout(0, 1));
@@ -44,16 +48,16 @@ public class PanelMain implements AR, Panel {
 		gui.addAttr(new JPanel(), "info");
 		
 		for (String name : main.files.get(Resource.SETTINGS).getList("allowedButtons")){
-			System.out.println("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png");
 			gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png")), name);
 			gui.addAttr(new JPanel(), name + "_panel");
-			gui.getPanel(name + "_panel").setBackground(main.getEventListener().getColor(Color.decode(main.files.get(Resource.SETTINGS).getStr("color_tint"))));
+			gui.getPanel(name + "_panel").setBackground(new Color(settings.getFloat("color_slider_red"), settings.getFloat("color_slider_green"), settings.getFloat("color_slider_blue"), settings.getFloat("transparency")));
 			gui.panel().addMouseListener(new MouseEventListener(main, name));
 			gui.getPanel(name + "_panel").add(gui.getLabel(name));
 			gui.getPanel("main").add(gui.getPanel(name + "_panel"));
 		}
 
 		gui.getPanel("main").setOpaque(false);
+		gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "Welcome to djFacade v1.0" + main.loadStyle("setup_end.dj")));
 		gui.getPanel("info").setOpaque(false);
 		gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "djFacade" + main.loadStyle("setup_end.dj")));
 

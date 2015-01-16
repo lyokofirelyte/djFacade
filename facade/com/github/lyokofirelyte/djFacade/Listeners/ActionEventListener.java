@@ -31,41 +31,14 @@ public class ActionEventListener implements AR, ActionListener {
 	public ActionEventListener(DJFacade i){
 		main = i;
 	}
-	
-	public Color getColor(Color c){
-	    return new Color(
-	    		c.getRed()/255,
-	            c.getGreen()/255,
-	            c.getBlue()/255,
-	            main.files.get(Resource.SETTINGS).getFloat("transparency")
-	    );
-	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		
+		main.getPanel(Resource.PANEL_SETTINGS).getGui().repaint();
 
 		switch (ActionCommand.valueOf(e.getActionCommand().toString())){
-		
-			case COLOR:
-				
-				GUI gui = main.getPanel(Resource.MAIN).getGui();
-				String text = main.getPanel(Resource.PANEL_SETTINGS).getGui().getHintTextField("color_tint").getText();
-				Color clor = getColor(Color.decode(text));
-				
-				main.files.get(Resource.SETTINGS).put("color_tint", text);
-				
-				for (String thing : gui.objects.keySet()){
-					if (thing.contains("_panel")){
-						try {
-							gui.getPanel(thing).setBackground(clor);
-						} catch (Exception ee){}
-					}
-				}
-				
-				gui.repaint();
-				
-			break;
-			
+
 			case TOOL_TIPS:
 				
 				main.files.get(Resource.SETTINGS).set("tool_tips", !main.files.get(Resource.SETTINGS).getBool("tool_tips"));
@@ -83,7 +56,7 @@ public class ActionEventListener implements AR, ActionListener {
 				
 				final JSONMap map = main.files.get(Resource.SETTINGS);
 				final Panel panel = main.getPanel(Resource.PANEL_LOGIN);
-				text = panel.getGui().getLabel("whoAreYou").getText();
+				String text = panel.getGui().getLabel("whoAreYou").getText();
 				
 				if (text.contains("Who are you?")){
 					System.out.println("Username recorded - transition moving.");
