@@ -42,7 +42,7 @@ public class PanelSettings implements AR, Panel {
 		
 		GUI mainGui = main.getPanel(Resource.MAIN).getGui();
 		
-		gui.addAttr(new JLabel(main.getImage("bg3.png", 720, 300)), "bg");
+		gui.addAttr(new JLabel(main.getImage("bg4.png", 720, 300)), "bg");
 		gui.addAttr(new JPanel(), "main");
 		gui.addAttr(new JPanel(), "allowedButtons");
 		gui.addAttr(new JPanel(), "transparency");
@@ -51,6 +51,8 @@ public class PanelSettings implements AR, Panel {
 		gui.addAttr(new JTextArea(), "info_text");
 		gui.addAttr(new JCheckBox(), "tool_tip");
 		gui.addAttr(new JCheckBox(), "on_top");
+		gui.addAttr(new JCheckBox(), "applyPanel");
+		gui.addAttr(new JCheckBox(), "applyText");
 		gui.addAttr(new JSlider(JSlider.HORIZONTAL, 0, 255, Math.round(main.files.get(Resource.SETTINGS).getFloat("color_slider_red")*100)), "color_slider_red");
 		gui.addAttr(new JSlider(JSlider.HORIZONTAL, 0, 255, Math.round(main.files.get(Resource.SETTINGS).getFloat("color_slider_green")*100)), "color_slider_green");
 		gui.addAttr(new JSlider(JSlider.HORIZONTAL, 0, 255, Math.round(main.files.get(Resource.SETTINGS).getFloat("color_slider_blue")*100)), "color_slider_blue");
@@ -131,16 +133,28 @@ public class PanelSettings implements AR, Panel {
 		gui.getPanel("colors").add(gui.getSlider("color_slider_blue"));
 		gui.getPanel("colors").setOpaque(false);
 		
-		gui.getCheckBox("tool_tip").setText(main.loadStyle("setup.dj") + "Tool Tips on Hover" + main.loadStyle("setup_end.dj"));
+		gui.getCheckBox("tool_tip").setText(main.loadStyle("setup.dj") + "Tool Tips" + main.loadStyle("setup_end.dj"));
 		gui.checkBox().setSelected(main.files.get(Resource.SETTINGS).getBool("tool_tips"));
 		gui.checkBox().addActionListener(main.getEventListener());
 		gui.checkBox().setActionCommand(ActionCommand.TOOL_TIPS.toString());
 		gui.checkBox().setOpaque(false);
 		
-		gui.getCheckBox("on_top").setText(main.loadStyle("setup.dj") + "Always on Top" + main.loadStyle("setup_end.dj"));
+		gui.getCheckBox("on_top").setText(main.loadStyle("setup.dj") + "On Top" + main.loadStyle("setup_end.dj"));
 		gui.checkBox().setSelected(main.files.get(Resource.SETTINGS).getBool("on_top"));
 		gui.checkBox().addActionListener(main.getEventListener());
 		gui.checkBox().setActionCommand(ActionCommand.ON_TOP.toString());
+		gui.checkBox().setOpaque(false);
+		
+		gui.getCheckBox("applyPanel").setText(main.loadStyle("setup.dj") + "Apply to Panel" + main.loadStyle("setup_end.dj"));
+		gui.checkBox().setSelected(main.files.get(Resource.SETTINGS).getBool("applyPanel"));
+		gui.checkBox().addActionListener(main.getEventListener());
+		gui.checkBox().setActionCommand(ActionCommand.PANEL.toString());
+		gui.checkBox().setOpaque(false);
+		
+		gui.getCheckBox("applyText").setText(main.loadStyle("setup.dj") + "Apply to Text" + main.loadStyle("setup_end.dj"));
+		gui.checkBox().setSelected(main.files.get(Resource.SETTINGS).getBool("applyText"));
+		gui.checkBox().addActionListener(main.getEventListener());
+		gui.checkBox().setActionCommand(ActionCommand.TEXT.toString());
 		gui.checkBox().setOpaque(false);
 		
 		gui.getTextArea("info_text").setText("djFacade Settings v1.0");
@@ -149,6 +163,8 @@ public class PanelSettings implements AR, Panel {
 		gui.textArea().setFont(new Font("Trebuchet MS", Font.ITALIC, 12));
 		gui.getPanel("info").setOpaque(false);
 		
+		gui.getPanel("info").add(gui.getCheckBox("applyPanel"));
+		gui.getPanel("info").add(gui.getCheckBox("applyText"));
 		gui.getPanel("info").add(gui.getCheckBox("tool_tip"));
 		gui.getPanel("info").add(gui.getCheckBox("on_top"));
 		gui.getPanel("info").add(gui.getTextArea("info_text"));

@@ -6,6 +6,8 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -47,7 +49,17 @@ public class PanelMain implements AR, Panel {
 		gui.addAttr(new JPanel(), "main");
 		gui.addAttr(new JPanel(), "info");
 		
-		for (String name : main.files.get(Resource.SETTINGS).getList("allowedButtons")){
+		List<String> buttonList = new ArrayList<String>();
+		
+		for (String button : settings.getList("allowedButtons")){
+			if (!button.contains("settings")){
+				buttonList.add(button);
+			}
+		}
+		
+		buttonList.add("settings");
+		
+		for (String name : buttonList){
 			gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png")), name);
 			gui.addAttr(new JPanel(), name + "_panel");
 			gui.getPanel(name + "_panel").setBackground(new Color(settings.getFloat("color_slider_red"), settings.getFloat("color_slider_green"), settings.getFloat("color_slider_blue"), settings.getFloat("transparency")));
@@ -57,7 +69,7 @@ public class PanelMain implements AR, Panel {
 		}
 
 		gui.getPanel("main").setOpaque(false);
-		gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "Welcome to djFacade v1.0" + main.loadStyle("setup_end.dj")));
+		//gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "Welcome to djFacade v1.0" + main.loadStyle("setup_end.dj")));
 		gui.getPanel("info").setOpaque(false);
 		gui.panel().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "djFacade" + main.loadStyle("setup_end.dj")));
 

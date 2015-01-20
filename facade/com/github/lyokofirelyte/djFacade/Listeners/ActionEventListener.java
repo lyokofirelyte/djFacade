@@ -35,7 +35,9 @@ public class ActionEventListener implements AR, ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		
-		main.getPanel(Resource.PANEL_SETTINGS).getGui().repaint();
+		try {
+			main.getPanel(Resource.PANEL_SETTINGS).getGui().repaint();
+		} catch (Exception eee){}
 
 		switch (ActionCommand.valueOf(e.getActionCommand().toString())){
 
@@ -49,6 +51,18 @@ public class ActionEventListener implements AR, ActionListener {
 				
 				main.files.get(Resource.SETTINGS).set("on_top", !main.files.get(Resource.SETTINGS).getBool("on_top"));
 				main.getPanel(Resource.MAIN).getGui().setAlwaysOnTop(main.files.get(Resource.SETTINGS).getBool("on_top"));
+				
+			break;
+			
+			case PANEL:
+				
+				main.files.get(Resource.SETTINGS).set("applyPanel", !main.files.get(Resource.SETTINGS).getBool("applyPanel"));
+				
+			break;
+			
+			case TEXT:
+				
+				main.files.get(Resource.SETTINGS).set("applyText", !main.files.get(Resource.SETTINGS).getBool("applyText"));
 				
 			break;
 		

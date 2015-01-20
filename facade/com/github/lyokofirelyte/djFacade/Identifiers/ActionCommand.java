@@ -6,7 +6,9 @@ public enum ActionCommand {
 	COLOR("COLOR"),
 	TOOL_TIPS("TOOL_TIPS"),
 	ON_TOP("ON_TOP"),
-	RESET("RESET");
+	RESET("RESET"),
+	PANEL("PANEL"),
+	TEXT("TEXT");
 	
 	ActionCommand(String type){
 		this.type = type;

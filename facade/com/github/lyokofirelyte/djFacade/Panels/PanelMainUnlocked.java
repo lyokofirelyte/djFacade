@@ -35,7 +35,6 @@ public class PanelMainUnlocked implements AR, Panel {
 		gui.addAttr(new JPanel(), "main");
 		
 		for (String name : main.files.get(Resource.SETTINGS).getList("allowedButtons")){
-			System.out.println("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png");
 			gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(name) + ".png")), name);
 			gui.addAttr(new JPanel(), name + "_panel");
 			gui.getPanel(name + "_panel").setBackground(Color.BLACK);

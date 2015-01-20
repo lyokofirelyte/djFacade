@@ -3,26 +3,30 @@ package com.github.lyokofirelyte.djFacade.Panels;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.border.TitledBorder;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import org.json.simple.JSONObject;
 
 import com.github.lyokofirelyte.djFacade.DJFacade;
 import com.github.lyokofirelyte.djFacade.GUI;
-import com.github.lyokofirelyte.djFacade.HintTextField;
+import com.github.lyokofirelyte.djFacade.JSONMap;
 import com.github.lyokofirelyte.djFacade.Identifiers.AR;
-import com.github.lyokofirelyte.djFacade.Identifiers.ActionCommand;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
 import com.github.lyokofirelyte.djFacade.Listeners.MouseEventListener;
-import com.github.lyokofirelyte.djFacade.Listeners.SliderEventListener;
+import com.github.lyokofirelyte.djFacade.Listeners.ScrollBarListener;
 
 public class PanelQueue implements AR, Panel {
 	
@@ -32,94 +36,99 @@ public class PanelQueue implements AR, Panel {
 	public PanelQueue(DJFacade i){
 		main = i;
 	}
-
+	
+	@SuppressWarnings("unchecked")
+	public List<JSONObject> getQueue(){
+		JSONMap sendMap = new JSONMap();
+		JSONObject loginMap = new JSONObject();
+		sendMap.put("type", "refresh");
+		loginMap.put("username", main.files.get(Resource.SETTINGS).getStr("username"));
+		loginMap.put("password", main.files.get(Resource.SETTINGS).getStr("password"));
+		sendMap.put("data", loginMap);
+		List<JSONObject> list = new ArrayList<JSONObject>();
+		try {
+			list = ((List<JSONObject>) ((JSONObject) ((JSONObject) main.sendPost("/api/dj", sendMap)).get("data")).get("queue"));
+			main.files.get(Resource.SETTINGS).set("nowPlaying", list.get(0).get("title"));
+		} catch (Exception e){}
+		return list;
+	}
+	
 	public void display(){
-		gui = new GUI("queue");
-		gui.setLayout(new FlowLayout());
-		gui.setResizable(false);
-		gui.setTitle("djFacade");
-		gui.setUndecorated(true);
-		gui.setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
-		
-		GUI mainGui = main.getPanel(Resource.MAIN).getGui();
-		
-		gui.addAttr(new JLabel(main.getImage("settings.png")), "bg");
-		gui.addAttr(new JPanel(), "main");
-		gui.addAttr(new JPanel(), "allowedButtons");
-		gui.addAttr(new JPanel(), "transparency");
-		gui.addAttr(new JPanel(), "info");
-		gui.addAttr(new JTextArea(), "info_text");
-		gui.addAttr(new HintTextField(main.files.get(Resource.SETTINGS).getStr("color_tint")), "color_tint");
-		gui.addAttr(new JSlider(JSlider.HORIZONTAL, 0, 100, Math.round(main.files.get(Resource.SETTINGS).getFloat("transparency")*100)), "transparency_slider");
-		gui.addAttr(new JLabel(main.getImage("icons/ic_action_accept.png", 70, 70)), "accept");
-		gui.getLabel("bg").setPreferredSize(new Dimension(700, 170));
-		gui.label().setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		gui.label().setLayout(new FlowLayout(0, 0, 0));
-		gui.getPanel("main").setPreferredSize(new Dimension(700, 220));
-		gui.panel().setLayout(new GridLayout(0, 1));
-		gui.panel().setOpaque(false);
-		gui.panel().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
-		
-		for (String button : main.getMouseListener().map.keySet()){
-			if (main.files.get(Resource.SETTINGS).getList("allowedButtons").contains(button)){
-				gui.addAttr(new JLabel(main.getImage("icons/dark/ic_action_" + main.getMouseListener().map.get(button) + ".png", 40, 40)), button + "_settings");
-			} else {
-				gui.addAttr(new JLabel(main.getImage("icons/ic_action_" + main.getMouseListener().map.get(button) + ".png", 40, 40)), button + "_settings");
+		  
+		try {
+			
+			gui = new GUI("queue");
+			gui.setLayout(new FlowLayout(0, 0, 0));
+			gui.setResizable(false);
+			gui.setTitle("djFacade");
+			gui.setUndecorated(true);
+			gui.setBackground(new Color(0, 0, 0, 0.0f));
+			
+			GUI mainGui = main.getPanel(Resource.MAIN).getGui();
+			JSONMap map = main.files.get(Resource.SETTINGS);
+			
+			gui.addAttr(new JPanel(), "main");
+			gui.addAttr(new JScrollPane(gui.getPanel("main")), "main_scroll");
+			gui.getScroll("main_scroll").setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			gui.scroll().setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+			gui.scroll().setOpaque(false);
+			gui.scroll().setBackground(new Color(0.0f, 0, 0, 0f));
+			gui.scroll().setPreferredSize(new Dimension(700, 140));
+			gui.scroll().getHorizontalScrollBar().addAdjustmentListener(new ScrollBarListener(main, "queue_bar"));
+			gui.scroll().getHorizontalScrollBar().setOpaque(false);
+			gui.scroll().getHorizontalScrollBar().setUI(new BasicScrollBarUI());
+			gui.scroll().setBorder(BorderFactory.createEmptyBorder());
+			
+			int x = 0;
+			List<JSONObject> queue = new ArrayList<JSONObject>(getQueue());
+			
+			for (JSONObject obj : queue){
+				gui.addAttr(new JPanel(), x + "_inQueue");
+				gui.getPanel(x + "_inQueue").setOpaque(false);
+				gui.panel().setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+				gui.getPanel(x + "_inQueue").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + main.getTimeFromSeconds(Integer.parseInt(((Long) obj.get("duration")).toString())) + main.loadStyle("setup_end.dj")));
+				gui.panel().setOpaque(false);
+				gui.panel().addMouseListener(new MouseEventListener(main, x + "_inQueue"));
+				gui.addAttr(new JLabel(main.getImageFromUrl((String) obj.get("thumb"), x == 0 ? 142 : 116, x == 0 ? 90 : 72)), x + "_label");
+				gui.getLabel(x + "_label").setOpaque(false);
+				gui.getPanel(x + "_inQueue").add(gui.getLabel(x + "_label"));
+				map.put(x + "_inQueue_user", ((String) obj.get("user")));
+				map.put(x + "_inQueue_title", ((String) obj.get("title")));
+				map.put(x + "_inQueue_link", ((String) obj.get("link")));
+				map.put(x + "_inQueue_duration", obj.get("duration"));
+				gui.getPanel("main").add(gui.getPanel(x + "_inQueue"));
+				x++;
 			}
-			gui.getLabel(button + "_settings").addMouseListener(new MouseEventListener(main, button + "_settings"));
-			gui.addAttr(new JPanel(), main.getMouseListener().map.get(button));
-			gui.getPanel(main.getMouseListener().map.get(button)).add(gui.getLabel(button + "_settings"));
-			gui.getPanel("allowedButtons").add(gui.getPanel(main.getMouseListener().map.get(button)));
-			gui.getPanel("allowedButtons").setOpaque(false);
-			gui.panel().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
-		}
+			
+			if (queue.size() < 7){
+				for (int i = queue.size(); i < 7; i++){
+					gui.addAttr(new JPanel(), i + "_inQueue");
+					gui.getPanel(i + "_inQueue").setOpaque(false);
+					gui.panel().setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
+					gui.addAttr(new JLabel(main.getImage("icons/ic_action_about.png", 70, 70)), i + "_label");
+					gui.getLabel(i + "_label").setOpaque(false);
+					gui.getPanel(i + "_inQueue").add(gui.getLabel(i + "_label"));
+					gui.getPanel(i + "_inQueue").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "00:00" + main.loadStyle("setup_end.dj")));
+					gui.panel().setOpaque(false);
+					gui.getPanel("main").add(gui.getPanel(i + "_inQueue"));
+				}
+			}
 
-		gui.getPanel("allowedButtons").setLayout(new FlowLayout(FlowLayout.CENTER, 10, 0));
-		TitledBorder b = BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "<div style='font-size: 15'>Enable/Disable Buttons</div>" + main.loadStyle("setup_end.dj"));
-		b.setTitleJustification(TitledBorder.CENTER);
-		gui.panel().setBorder(b);
-		gui.getPanel("main").add(gui.getPanel("allowedButtons"));
-		
-		gui.getPanel("transparency").setOpaque(false);
-		gui.panel().setLayout(new FlowLayout(FlowLayout.CENTER, 20, 0));
-		gui.getSlider("transparency_slider").setMajorTickSpacing(20);
-		gui.slider().setMinorTickSpacing(1);
-		gui.slider().setOpaque(false);
-		gui.slider().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "Opacity" + main.loadStyle("setup_end.dj")));
-		gui.slider().addChangeListener(new SliderEventListener(main, "transparency"));
-		gui.slider().setPaintTicks(true);
-		
-		gui.getPanel("transparency").add(gui.getSlider("transparency_slider"));
-		
-		gui.getHintTextField("color_tint").setOpaque(false);
-		gui.hintTextField().addActionListener(main.getEventListener());
-		gui.hintTextField().setActionCommand(ActionCommand.COLOR.toString());
-		gui.hintTextField().setPreferredSize(new Dimension(140, 60));
-		gui.hintTextField().setFont(new Font("Trebuchet MS", Font.ITALIC, 12));
-		gui.hintTextField().setBackground(new Color(1.0f, 1.0f, 1.0f, 0.05f));
-		gui.hintTextField().setForeground(Color.ORANGE);
-		gui.hintTextField().setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + "Color Tint (HEX)" + main.loadStyle("setup_end.dj")));
-		
-		gui.getTextArea("info_text").setText("I hope you people enjoy this thing, it took me a long ass time! -David");
-		gui.textArea().setOpaque(false);
-		gui.textArea().setForeground(Color.WHITE);
-		gui.textArea().setFont(new Font("Trebuchet MS", Font.ITALIC, 12));
-		gui.getPanel("info").setOpaque(false);
-		
-		gui.getPanel("transparency").add(gui.getHintTextField("color_tint"));
-		gui.getPanel("info").add(gui.getTextArea("info_text"));
-		gui.getPanel("main").add(gui.getPanel("transparency"));
-		gui.getPanel("main").add(gui.getPanel("info"));
-		
-		gui.getLabel("bg").add(gui.getPanel("main"));
-		gui.add(gui.getLabel("bg"));
-		
-		gui.setLocation(mainGui.getX(), (mainGui.getY() - mainGui.getHeight()) - 200);
-		gui.setAlwaysOnTop(true);
-		gui.pack();
-		gui.setVisible(true);
-		gui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		gui.addWindowListener(main.getListeners().adapter);
+			gui.getPanel("main").setLayout(new FlowLayout());
+			gui.panel().setBackground(new Color(0, 0, 0, 0.5f));
+			
+			gui.add(gui.getScroll("main_scroll"));
+			gui.setLocation(mainGui.getX(), (mainGui.getY() - mainGui.getHeight()) - 35);
+			gui.setAlwaysOnTop(main.files.get(Resource.SETTINGS).getBool("on_top"));
+			gui.pack();
+			gui.setVisible(true);
+			gui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			gui.addWindowListener(main.getListeners().adapter);
+			mainGui.repaint();
+			
+		} catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 	
 	public void hide(){

@@ -11,6 +11,8 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -31,6 +33,10 @@ public class GUI extends JDialog {
 	
 	public String getName(){
 		return name;
+	}
+	
+	public JProgressBar getProgressBar(String name){
+		return (JProgressBar) (curr = objects.get(name));
 	}
 	
 	public JSlider getSlider(String name){
@@ -81,6 +87,14 @@ public class GUI extends JDialog {
 		return (JColorChooser) (curr = objects.get(name));
 	}
 	
+	public JScrollPane getScroll(String name){
+		return (JScrollPane) (curr = objects.get(name));
+	}
+	
+	public JScrollPane scroll(){
+		return (JScrollPane) curr;
+	}
+	
 	public JEditorPane editorPane(){
 		return (JEditorPane) curr;
 	}
@@ -95,6 +109,10 @@ public class GUI extends JDialog {
 	
 	public JCheckBox checkBox(){
 		return (JCheckBox) curr;
+	}
+	
+	public JProgressBar bar(){
+		return (JProgressBar) curr;
 	}
 	
 	public JPanel panel(){

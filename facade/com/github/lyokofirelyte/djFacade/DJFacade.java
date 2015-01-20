@@ -2,6 +2,8 @@ package com.github.lyokofirelyte.djFacade;
 
 import gnu.trove.map.hash.THashMap;
 
+import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -27,6 +29,7 @@ import java.util.zip.ZipInputStream;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import org.json.simple.JSONObject;
@@ -39,6 +42,7 @@ import com.github.lyokofirelyte.djFacade.Listeners.LineEventListener;
 import com.github.lyokofirelyte.djFacade.Listeners.MouseEventListener;
 import com.github.lyokofirelyte.djFacade.Listeners.WindowListener;
 import com.github.lyokofirelyte.djFacade.Panels.Panel;
+import com.github.lyokofirelyte.djFacade.Panels.PanelQueue;
 
 public class DJFacade {
 	
@@ -50,6 +54,7 @@ public class DJFacade {
 	public List<String> buttons = new ArrayList<String>();
 	private MouseEventListener mouseListener;
 	private YouTubeHandler handler = new YouTubeHandler();
+	private QueueTimer timer;
 	
 	public DJFacade(){
 		tryCatch(this, "start");
@@ -59,8 +64,25 @@ public class DJFacade {
 		
 		System.out.println("Booting up & adjusting system themes.");
 		
+		String[] scrollBarThings = new String[]{
+				"ScrollBar.background",
+				"ScrollBar.darkShadow",
+				"ScrollBar.foreground",
+				"ScrollBar.highlight",
+				"ScrollBar.shadow",
+				"ScrollBar.thumb",
+				"ScrollBar.thumbDarkShadow",
+				"ScrollBar.thumbShadow",
+				"ScrollBar.track",
+				"ScrollBar.trackHighlight",
+				"ScrollBar.thumbHighlight"
+		};
+		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			for (String s : scrollBarThings){
+				UIManager.getLookAndFeelDefaults().put(s, Color.BLACK);
+			}
 		} catch (Exception e){}
 		
 		new DJFacade();
@@ -99,6 +121,9 @@ public class DJFacade {
 			}
 		}
 		
+		files.get(Resource.SETTINGS).set("nowPlaying", "Nothing Playing");
+		timer = new QueueTimer(this);
+		timer.start();
 		System.out.println("System completed startup.");
 	}
 	
@@ -114,10 +139,26 @@ public class DJFacade {
 		return handler;
 	}
 	
+	public void openWebpage(String url) {
+	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+	        try {
+	            desktop.browse(new URL(url).toURI());
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+	}
+	
 	public void defaultSetup(){
 		files.get(Resource.SETTINGS).set("transparency", 0.05f);
 		files.get(Resource.SETTINGS).set("on_top", true);
+		files.get(Resource.SETTINGS).set("applyPanel", true);
+		files.get(Resource.SETTINGS).set("applyText", true);
 		files.get(Resource.SETTINGS).set("color_tint", "#FFFFFF");
+		files.get(Resource.SETTINGS).set("color_slider_red", 252);
+		files.get(Resource.SETTINGS).set("color_slider_green", 156);
+		files.get(Resource.SETTINGS).set("color_slider_blue", 99);
 		files.get(Resource.SETTINGS).set("tool_tips", true);
 		buttons = new ArrayList<String>(Arrays.asList("add", "remove", "refresh", "veto", "favorite", "video", "download", "list", "chat", "unlock", "settings"));
 		files.get(Resource.SETTINGS).put("allowedButtons", buttons);
@@ -220,6 +261,10 @@ public class DJFacade {
 		}
 	}
 	
+	public QueueTimer getTimer(){
+		return timer;
+	}
+	
 	public void onlyShow(Panel... panels){
 		for (Object obj : registeredClasses.values()){
 			if (obj instanceof Panel){
@@ -245,8 +290,10 @@ public class DJFacade {
 	
 	public String loadStyle(String name){
 		
+		JSONMap settings = files.get(Resource.SETTINGS);
+		
 		try {
-			return new String(Files.readAllBytes(Paths.get("data/styles/" + name)));
+			return new String(Files.readAllBytes(Paths.get("data/styles/" + name))).replace("color: orange", "color:" + String.format("#%02x%02x%02x", settings.getInt("color_slider_red_text"), settings.getInt("color_slider_green_text"), settings.getInt("color_slider_blue_text")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -293,6 +340,19 @@ public class DJFacade {
 		return null;
 	}
 	
+	public ImageIcon getImageFromUrl(String path, int width, int height){
+		
+		try {
+		    BufferedImage img = ImageIO.read(new URL(path));
+		    Image dimg2 = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+			return new ImageIcon(dimg2);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
 	public ImageIcon getImage(String path){
 		try {
 		    BufferedImage img = ImageIO.read(getClass().getClassLoader().getResource(path));
@@ -327,6 +387,19 @@ public class DJFacade {
 		}
 	}
 	
+	public String getTimeFromSeconds(int totalSeconds){
+		totalSeconds += 15;
+	    int seconds = totalSeconds % 60;
+	    int totalMinutes = totalSeconds / 60;
+	    int minutes = totalMinutes % 60;
+	    int hours = totalMinutes / 60;
+		
+	    String secs = seconds >= 10 ? seconds + "" : "0" + seconds;
+	    String mins = minutes >= 10 ? minutes + "" : "0" + minutes;
+	    String hourss = hours > 0 ? (hours >= 10 ? hours + "" : "0" + hours) : "";
+	    return (hours > 0 ? hourss + ":" : "") + mins + ":" + secs;
+	}
+	
 	public JSONObject sendPost(final String folder, final Map<String, Object> map){
 		
 		JSONObject result = null;
@@ -339,7 +412,7 @@ public class DJFacade {
 				json.put(key, map.get(key));
 			}
 			 
-			String url = "http://worldsapart.no-ip.org:9090" + folder;
+			String url = "http://worldsapart.no-ip.org" + folder;
 			URL obj = new URL(url);
 			HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 			con.setRequestMethod("POST");
@@ -365,7 +438,10 @@ public class DJFacade {
 			
 			result = (JSONObject) new JSONParser().parse(response.toString());
 			
-		} catch (Exception e){}
+		} catch (Exception e){
+			JOptionPane.showMessageDialog(null, "SHIT'S BROKE! CAN'T REACH OHSOTOTES.COM. CLOSING THIS BITCH!");
+			System.exit(0);
+		}
 		
 		return result;
 	}

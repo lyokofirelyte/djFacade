@@ -37,6 +37,7 @@ public class MouseEventListener implements MouseListener {
 		map.put("download", "download");
 		map.put("chat", "chat");
 		map.put("unlock", "not_secure");
+		map.put("search", "search");
 		if (!main.bools.containsKey("unlocked")){
 			main.bools.put("unlocked", false);
 		}
@@ -65,8 +66,29 @@ public class MouseEventListener implements MouseListener {
 			main.getPanel(Resource.MAIN).display();
 			main.getPanel(Resource.MAIN).getGui().setLocation(gui.getX(), gui.getY());
 		}
+		
+		if (type.contains("_inQueue")){
+			main.openWebpage(main.files.get(Resource.SETTINGS).getStr(type + "_link"));
+		}
 
 		switch (type){
+		
+			case "list":
+
+				if (!main.bools.containsKey("list")){
+					main.bools.put("list", false);
+				}
+				
+				if (main.bools.get("list")){
+					main.onlyShow(main.getPanel(Resource.MAIN));
+				} else {
+					main.getPanel(Resource.PANEL_QUEUE).display();
+					main.onlyShow(main.getPanel(Resource.MAIN), main.getPanel(Resource.PANEL_QUEUE));
+				}
+				
+				main.bools.put("list", !main.bools.get("list"));
+				
+			break;
 		
 			case "add":
 				
@@ -125,13 +147,21 @@ public class MouseEventListener implements MouseListener {
 				gui.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()-5);
 				if (!type.contains("_settings")){
+					gui.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(new String(type.replace("_settings", ""))) + ".png"));
 					if (main.files.get(Resource.SETTINGS).getBool("tool_tips")){
 						gui.getPanel("info").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + type + main.loadStyle("setup_end.dj")));
 					}
-					gui.getLabel(type).setIcon(main.getImage("icons/dark/ic_action_" + map.get(type) + ".png"));
 					e.getComponent().setBackground(new Color(1.0f, 1.0f, 1.0f, 1.0f));
 				}
 				gui.repaint();
+		}
+		
+		if (type.contains("_inQueue")){
+			JSONMap settings = main.files.get(Resource.SETTINGS);
+			String user = settings.getStr(type.substring(0, 1) + "_inQueue_user");
+			String title = settings.getStr(type.substring(0, 1) + "_inQueue_title");
+			main.getPanel(Resource.MAIN).getGui().getPanel("info").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + title + " (" + user + ")" + main.loadStyle("setup_end.dj")));
+			main.getPanel(Resource.MAIN).getGui().repaint();
 		}
 	}
 	
@@ -147,13 +177,13 @@ public class MouseEventListener implements MouseListener {
 				gui.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 				gui.getLabel(type).setLocation(gui.getLabel(type).getX(), gui.getLabel(type).getY()+5);
 				if (!type.contains("_settings")){
-					gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(type) + ".png"));
-					gui.getPanel("info").setBorder(BorderFactory.createEmptyBorder());
+					gui.getLabel(type).setIcon(main.getImage("icons/ic_action_" + map.get(new String(type.replace("_settings", ""))) + ".png"));
 					gui.getPanel(type + "_panel").setBackground(new Color(settings.getFloat("color_slider_red"), settings.getFloat("color_slider_green"), settings.getFloat("color_slider_blue"), settings.getFloat("transparency")));
-
 				}
 				gui.repaint();
 		}
+		
+		gui.getPanel("info").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), main.loadStyle("setup.dj") + main.files.get(Resource.SETTINGS).getStr("nowPlaying") + main.loadStyle("setup_end.dj")));
 	}
 
 	@Override
