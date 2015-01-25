@@ -21,6 +21,7 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.SearchListResponse;
 import com.google.api.services.youtube.model.SearchResult;
+import com.google.api.services.youtube.model.VideoListResponse;
 
 public class YouTubeHandler {
 	
@@ -28,6 +29,7 @@ public class YouTubeHandler {
     public static final JsonFactory JSON_FACTORY = new JacksonFactory();
     private static final String CREDENTIALS_DIRECTORY = "data/.oauth-credentials";
     private Credential credential = null;
+    private YouTube youtube;
 	
 	public void authorize(List<String> scopes, String credentialDatastore) throws Exception {
 		Reader clientSecretReader = new InputStreamReader(this.getClass().getResourceAsStream("/seekrits.json"));
@@ -40,9 +42,7 @@ public class YouTubeHandler {
 	}
 
 	public List<SearchResult> getVideos(String query){
-		
-		YouTube youtube;
-		
+
 		try {
             youtube = new YouTube.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName("djFacade").build();
             YouTube.Search.List search = youtube.search().list("id,snippet");
@@ -58,4 +58,12 @@ public class YouTubeHandler {
 		
 		return new ArrayList<SearchResult>();
     }
+	
+	public String getEmbedCode(String id){
+		return "<iframe width=\"560\" height=\"315\" src=\"https://youtube.com/embed/" + id + "\" frameborder=\"0\" allowfullscreen></iframe>";
+	}
+	
+	public YouTube getYouTube(){
+		return youtube;
+	}
 }

@@ -26,6 +26,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import javafx.application.Application;
+import javafx.stage.Stage;
+
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -34,6 +37,8 @@ import javax.swing.UIManager;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import chrriis.dj.nativeswing.swtimpl.NativeInterface;
 
 import com.github.lyokofirelyte.djFacade.Identifiers.AR;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
@@ -54,38 +59,45 @@ public class DJFacade {
 	public List<String> buttons = new ArrayList<String>();
 	private MouseEventListener mouseListener;
 	private YouTubeHandler handler = new YouTubeHandler();
-	private QueueTimer timer;
+	public QueueTimer timer;
 	
 	public DJFacade(){
 		tryCatch(this, "start");
 	}
-	
+
 	public static void main(String[] args){
-		
+
 		System.out.println("Booting up & adjusting system themes.");
 		
 		String[] scrollBarThings = new String[]{
-				"ScrollBar.background",
-				"ScrollBar.darkShadow",
-				"ScrollBar.foreground",
-				"ScrollBar.highlight",
-				"ScrollBar.shadow",
-				"ScrollBar.thumb",
-				"ScrollBar.thumbDarkShadow",
-				"ScrollBar.thumbShadow",
-				"ScrollBar.track",
-				"ScrollBar.trackHighlight",
-				"ScrollBar.thumbHighlight"
+				"background",
+				"darkShadow",
+				"foreground",
+				"highlight",
+				"shadow",
+				"thumb",
+				"thumbDarkShadow",
+				"thumbShadow",
+				"track",
+				"trackHighlight",
+				"thumbHighlight"
 		};
 		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			for (String s : scrollBarThings){
-				UIManager.getLookAndFeelDefaults().put(s, Color.BLACK);
+				UIManager.getLookAndFeelDefaults().put("ScrollBar." + s, Color.BLACK);
 			}
 		} catch (Exception e){}
 		
 		new DJFacade();
+		
+		try {
+			NativeInterface.open();
+			NativeInterface.runEventPump();
+		} catch (Exception ee){} finally {
+			NativeInterface.close();
+		}
 	}
 	
 	public void start() throws Exception {
@@ -98,7 +110,6 @@ public class DJFacade {
 		
 		listeners();
 		tryCatch(this, "settings");
-		boolean cont = false;
 		
 		if (!files.get(Resource.SETTINGS).getBool("loggedIn")){
 			defaultSetup();
@@ -115,6 +126,8 @@ public class DJFacade {
 				if (files.get(Resource.SETTINGS).containsKey("mainX")){
 					getPanel(Resource.MAIN).getGui().setLocation(files.get(Resource.SETTINGS).getInt("mainX"), files.get(Resource.SETTINGS).getInt("mainY"));
 				}
+				timer = new QueueTimer(this);
+				timer.start();
 			} else {
 				System.out.println("Files have been modified! Re-auth needed!");
 				getPanel(Resource.PANEL_LOGIN).display();
@@ -122,13 +135,45 @@ public class DJFacade {
 		}
 		
 		files.get(Resource.SETTINGS).set("nowPlaying", "Nothing Playing");
-		timer = new QueueTimer(this);
-		timer.start();
 		System.out.println("System completed startup.");
 	}
 	
+	public JSONObject getChat(){
+		JSONObject sendMap = new JSONObject();
+		sendMap.put("user", files.get(Resource.SETTINGS).get("username"));
+		sendMap.put("type", "minecraft_refresh");
+		sendMap.put("players", new ArrayList<String>());
+		sendMap.put("check", "HtE4Sll2DaZxdw56F"); // insecure but hey you had to do some digging >:D (Elysian will stop invalid attempts anyway, sucker!) 
+		return sendPost("/api/chat", sendMap);
+	}
+	
+	public void sendChat(String msg){
+		JSONObject sendMap = new JSONObject();
+		sendMap.put("user", files.get(Resource.SETTINGS).get("username"));
+		sendMap.put("type", "minecraft_insert");
+		sendMap.put("check", "HtE4Sll2DaZxdw56F");
+		sendMap.put("message", msg);
+		sendPost("/api/chat", sendMap);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public List<JSONObject> getQueue(){
+		JSONMap sendMap = new JSONMap();
+		JSONObject loginMap = new JSONObject();
+		sendMap.put("type", "refresh");
+		loginMap.put("username", files.get(Resource.SETTINGS).getStr("username"));
+		loginMap.put("password", files.get(Resource.SETTINGS).getStr("password"));
+		sendMap.put("data", loginMap);
+		List<JSONObject> list = new ArrayList<JSONObject>();
+		try {
+			list = ((List<JSONObject>) ((JSONObject) ((JSONObject) sendPost("/api/dj", sendMap)).get("data")).get("queue"));
+			files.get(Resource.SETTINGS).set("nowPlaying", list.get(0).get("title"));
+		} catch (Exception e){}
+		return list;
+	}
+	
 	public void updateHeader(String name){
-		getPanel(Resource.MAIN).getGui().getPanel("main").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), loadStyle("setup.dj") + name + loadStyle("setup_end.dj")));
+		getPanel(Resource.MAIN).getGui().getPanel("info").setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(), loadStyle("setup.dj") + name + loadStyle("setup_end.dj")));
 	}
 	
 	public void hideHeader(){
@@ -139,6 +184,10 @@ public class DJFacade {
 		return handler;
 	}
 	
+	public YouTubeDownloader getYouTubeDownloader(){
+		return new YouTubeDownloader(this);
+	}
+
 	public void openWebpage(String url) {
 	    Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
 	    if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
@@ -156,11 +205,14 @@ public class DJFacade {
 		files.get(Resource.SETTINGS).set("applyPanel", true);
 		files.get(Resource.SETTINGS).set("applyText", true);
 		files.get(Resource.SETTINGS).set("color_tint", "#FFFFFF");
-		files.get(Resource.SETTINGS).set("color_slider_red", 252);
-		files.get(Resource.SETTINGS).set("color_slider_green", 156);
-		files.get(Resource.SETTINGS).set("color_slider_blue", 99);
+		files.get(Resource.SETTINGS).set("color_slider_red", 252/255);
+		files.get(Resource.SETTINGS).set("color_slider_green", 156/255);
+		files.get(Resource.SETTINGS).set("color_slider_blue", 99/255);
+		files.get(Resource.SETTINGS).set("color_slider_red_text", 204);
+		files.get(Resource.SETTINGS).set("color_slider_green_text",126);
+		files.get(Resource.SETTINGS).set("color_slider_blue_text", 0);
 		files.get(Resource.SETTINGS).set("tool_tips", true);
-		buttons = new ArrayList<String>(Arrays.asList("add", "remove", "refresh", "veto", "favorite", "video", "download", "list", "chat", "unlock", "settings"));
+		buttons = new ArrayList<String>(Arrays.asList("add", "remove", "veto", "favorite", "video", "download", "list", "chat", "unlock", "search", "settings"));
 		files.get(Resource.SETTINGS).put("allowedButtons", buttons);
 	}
 	
@@ -168,6 +220,7 @@ public class DJFacade {
 		
 		List<Class<?>> allClasses = new ArrayList<Class<?>>();
 		mouseListener = new MouseEventListener(this, "default");
+		new File("data/downloads").mkdirs();
         
         try {
         

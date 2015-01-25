@@ -45,7 +45,7 @@ public class PanelLogin implements AR, Panel {
 		gui.addAttr(new HintTextField("user identification"), "username");
 		
 		gui.getLabel("whoAreYou").setPreferredSize(new Dimension(gui.getWidth(), 15));
-		gui.label().setText(main.styles.get("setup") + "Who are you?" + main.styles.get("setup_end"));
+		gui.label().setText(main.loadStyle("setup.dj") + "What's your worldscolli.de username?" + main.styles.get("setup_end"));
 		
 		gui.getHintTextField("username").setPreferredSize(new Dimension(gui.getWidth(), 25));
 		gui.hintTextField().addActionListener(main.getEventListener());

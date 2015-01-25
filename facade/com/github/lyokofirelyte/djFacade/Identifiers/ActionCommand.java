@@ -8,7 +8,10 @@ public enum ActionCommand {
 	ON_TOP("ON_TOP"),
 	RESET("RESET"),
 	PANEL("PANEL"),
-	TEXT("TEXT");
+	SEARCH_BAR("SEARCH_BAR"),
+	VIDEO("VIDEO"),
+	TEXT("TEXT"),
+	CHAT_BAR("CHAT_BAR");
 	
 	ActionCommand(String type){
 		this.type = type;

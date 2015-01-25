@@ -60,10 +60,10 @@ public class PanelSettings implements AR, Panel {
 		gui.addAttr(new HintTextField(main.files.get(Resource.SETTINGS).getStr("color_tint")), "color_tint");
 		gui.addAttr(new JSlider(JSlider.HORIZONTAL, 0, 100, Math.round(main.files.get(Resource.SETTINGS).getFloat("transparency")*100)), "transparency_slider");
 		gui.addAttr(new JLabel(main.getImage("icons/ic_action_accept.png", 70, 70)), "accept");
-		gui.getLabel("bg").setPreferredSize(new Dimension(700, 300));
+		gui.getLabel("bg").setPreferredSize(new Dimension(680, 300));
 		gui.label().setOpaque(true);
 		gui.label().setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		gui.label().setLayout(new FlowLayout(0, 0, 0));
+		gui.label().setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
 		gui.getPanel("main").setBackground(new Color(1.0f, 1.0f, 1.0f, 0.0f));
 		gui.panel().setLayout(new GridLayout(0, 1));
 		
@@ -181,7 +181,6 @@ public class PanelSettings implements AR, Panel {
 		gui.setVisible(true);
 		gui.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		gui.addWindowListener(main.getListeners().adapter);
-
 	}
 	
 	public void hide(){

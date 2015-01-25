@@ -25,6 +25,16 @@
     		<version>1.1</version>
 		</dependency>
 		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.7</version>
+		</dependency>
+		<dependency>
+  			<groupId>com.github.axet</groupId>
+  			<artifactId>vget</artifactId>
+  			<version>1.1.22</version>
+		</dependency>
+		<dependency>
       		<groupId>com.google.apis</groupId>
       		<artifactId>google-api-services-youtube</artifactId>
       		<version>v3-rev125-1.19.1</version>
@@ -39,6 +49,21 @@
             <artifactId>google-oauth-client-jetty</artifactId>
             <version>${project.oauth.version}</version>
         </dependency>
+        <dependency>
+            <groupId>chrriis.common</groupId>
+            <artifactId>DJNativeSwing</artifactId>
+            <version>1</version>
+        </dependency>
+        <dependency>
+            <groupId>chrriis.common</groupId>
+            <artifactId>DJNativeSwing-SWT</artifactId>
+            <version>1</version>
+        </dependency>
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>swt</artifactId>
+			<version>4.4</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<sourceDirectory>facade</sourceDirectory>

@@ -11,7 +11,7 @@ import org.json.simple.JSONObject;
 
 import com.github.lyokofirelyte.djFacade.Identifiers.AR;
 import com.github.lyokofirelyte.djFacade.Identifiers.Resource;
-import com.github.lyokofirelyte.djFacade.Panels.PanelQueue;
+import com.github.lyokofirelyte.djFacade.Panels.PanelChat;
 
 public class QueueTimer implements AR {
 
@@ -53,19 +53,32 @@ public class QueueTimer implements AR {
 			public void run(){
 				
 				try {
-				
-					List<JSONObject> queue = ((PanelQueue) main.getPanel(Resource.PANEL_QUEUE)).getQueue();
+					
+					if (main.bools.containsKey("chat") && main.bools.get("chat")){
+						PanelChat chat = (PanelChat) main.getPanel(Resource.PANEL_CHAT);
+						chat.updateChat();
+					}
+					
+					List<JSONObject> queue = main.getQueue();
 					
 					if (queue.size() > 0){
 						String newName = (String) queue.get(0).get("title");
 						if (!songName.equals(newName)){
 							songName = (String) queue.get(0).get("title");
 							seconds = (Long) queue.get(0).get("duration");
+							if (main.files.get(Resource.SETTINGS).getBool("list")){
+								main.getPanel(Resource.PANEL_QUEUE).destroy();
+								main.getPanel(Resource.PANEL_QUEUE).display();
+							}
 							update();
 						}
 					} else {
 						seconds = 0;
 						songName = "";
+						if (main.files.get(Resource.SETTINGS).getBool("list")){
+							main.getPanel(Resource.PANEL_QUEUE).destroy();
+							main.getPanel(Resource.PANEL_QUEUE).display();
+						}
 						update();
 					}
 					
@@ -73,7 +86,7 @@ public class QueueTimer implements AR {
 					e.printStackTrace();
 				}
 			}
-		}, 1000L, 6000L, TimeUnit.MILLISECONDS);
+		}, 1000L, 5000L, TimeUnit.MILLISECONDS);
 		
 		System.out.println("Timers have begun!");
 	}

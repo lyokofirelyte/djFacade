@@ -27,6 +27,18 @@ public class ScrollBarListener implements AR, AdjustmentListener {
 				main.getPanel(Resource.PANEL_QUEUE).getGui().repaint();
 				
 			break;
+			
+			case "search_bar":
+				
+				main.getPanel(Resource.PANEL_SEARCH).getGui().repaint();
+				
+			break;
+			
+			case "chat_bar":
+				
+				main.getPanel(Resource.PANEL_CHAT).getGui().getEditorPane("textPane").repaint();
+				
+			break;
 		
 		}
 	}
